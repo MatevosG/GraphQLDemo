@@ -1,4 +1,6 @@
-using GraphQLDemo.API.Schema;
+using GraphQLDemo.API.Schema.Mutations;
+using GraphQLDemo.API.Schema.Queries;
+using GraphQLDemo.API.Schema.Subscriptions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -20,7 +22,13 @@ namespace GraphQLDemo.API
 
             services.AddGraphQLServer()
                                       .AddQueryType<Query>()
-                                      .AddType<CourseType>();
+                                      .AddMutationType<Mutation>()
+                                      .AddSubscriptionType<Subscription>()
+                                      .AddType<CourseType>()
+                                      .AddType<InstruktorType>()
+                                      .AddType<StudentType>();
+
+            services.AddInMemorySubscriptions();
 
         }
 
