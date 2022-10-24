@@ -23,11 +23,11 @@ namespace GraphQLDemo.API.Schema.Mutations
             };
             _courses.Add(course);
             
-            await topicEventSender.SendAsync(nameof(Subscription.CourseCreated),course);
+            await topicEventSender.SendAsync(nameof(Subscription.CourseCreated) , course);
             return course;
         }
 
-        public CourseResult Update(Guid id,CourseInputType courseInputType)
+        public async Task<CourseResult> UpdateCourse(Guid id,CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender)
         {
             var course = _courses.FirstOrDefault(x => x.Id == id);
 
@@ -39,6 +39,10 @@ namespace GraphQLDemo.API.Schema.Mutations
             course.Name = courseInputType.Name; 
             course.Subject = courseInputType.Subject;   
             course.InstruktorId = courseInputType.InstruktorId;
+
+            string updateCourseTopic = $"{course.Id}_{nameof(Subscription.CourseUpdated)}";
+
+            await topicEventSender.SendAsync(updateCourseTopic, course);
          
             return course;
         }
