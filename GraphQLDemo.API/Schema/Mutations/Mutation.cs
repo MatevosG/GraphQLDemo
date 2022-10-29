@@ -1,5 +1,7 @@
-﻿using GraphQLDemo.API.Schema.Queries;
+﻿using GraphQLDemo.API.DTOs;
+using GraphQLDemo.API.Schema.Queries;
 using GraphQLDemo.API.Schema.Subscriptions;
+using GraphQLDemo.API.Services;
 using HotChocolate;
 using HotChocolate.Subscriptions;
 using System;
@@ -11,17 +13,36 @@ namespace GraphQLDemo.API.Schema.Mutations
 {
     public class Mutation
     {
-        private readonly List<CourseResult> _courses = new List<CourseResult>();
+       // private readonly List<CourseResult> _courses = new List<CourseResult>();
+
+        private readonly CoursesRepository _coursesRepository ;
+
+        public Mutation(List<CourseResult> courses, CoursesRepository coursesRepository)
+        {
+            
+            _coursesRepository = coursesRepository;
+        }
+
         public async Task<CourseResult> CreateCourse(CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender)
         {
-            CourseResult course   = new CourseResult
+
+            CourseDTO courseDTO = new CourseDTO
             {
-                Id = Guid.NewGuid(),
                 Name = courseInputType.Name,
                 Subject = courseInputType.Subject,
-                InstruktorId = courseInputType.InstruktorId
+                InstructorId = courseInputType.InstruktorId
             };
-            _courses.Add(course);
+
+            _coursesRepository.Create(courseDTO);
+
+            CourseResult course   = new CourseResult
+            {
+                Id = courseDTO.Id,
+                Name = courseDTO.Name,
+                Subject = courseDTO.Subject,
+                InstruktorId = courseDTO.InstructorId
+            };
+           // _coursesRepository.Create(course);
             
             await topicEventSender.SendAsync(nameof(Subscription.CourseCreated) , course);
             return course;

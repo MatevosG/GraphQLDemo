@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GraphQLDemo.API.Migrations
 {
     [DbContext(typeof(SchoolDbContext))]
-    [Migration("20221024200601_initial")]
+    [Migration("20221029102115_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -17,6 +17,21 @@ namespace GraphQLDemo.API.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "5.0.9");
+
+            modelBuilder.Entity("CourseDTOStudentDTO", b =>
+                {
+                    b.Property<Guid>("CoursesId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("StudentsId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("CoursesId", "StudentsId");
+
+                    b.HasIndex("StudentsId");
+
+                    b.ToTable("CourseDTOStudentDTO");
+                });
 
             modelBuilder.Entity("GraphQLDemo.API.DTOs.CourseDTO", b =>
                 {
@@ -66,9 +81,6 @@ namespace GraphQLDemo.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("CourseDTOId")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("FirstName")
                         .HasColumnType("TEXT");
 
@@ -80,9 +92,22 @@ namespace GraphQLDemo.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseDTOId");
-
                     b.ToTable("Students");
+                });
+
+            modelBuilder.Entity("CourseDTOStudentDTO", b =>
+                {
+                    b.HasOne("GraphQLDemo.API.DTOs.CourseDTO", null)
+                        .WithMany()
+                        .HasForeignKey("CoursesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GraphQLDemo.API.DTOs.StudentDTO", null)
+                        .WithMany()
+                        .HasForeignKey("StudentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("GraphQLDemo.API.DTOs.CourseDTO", b =>
@@ -94,18 +119,6 @@ namespace GraphQLDemo.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Instructor");
-                });
-
-            modelBuilder.Entity("GraphQLDemo.API.DTOs.StudentDTO", b =>
-                {
-                    b.HasOne("GraphQLDemo.API.DTOs.CourseDTO", null)
-                        .WithMany("Students")
-                        .HasForeignKey("CourseDTOId");
-                });
-
-            modelBuilder.Entity("GraphQLDemo.API.DTOs.CourseDTO", b =>
-                {
-                    b.Navigation("Students");
                 });
 #pragma warning restore 612, 618
         }

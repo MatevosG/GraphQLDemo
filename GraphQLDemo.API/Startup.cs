@@ -36,6 +36,8 @@ namespace GraphQLDemo.API
 
             services.AddPooledDbContextFactory<SchoolDbContext>(o => o.UseSqlite(connectionstring));
 
+            services.AddScoped<CoursesRepository>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

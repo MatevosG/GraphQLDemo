@@ -22,6 +22,20 @@ namespace GraphQLDemo.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Students",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    FirstName = table.Column<string>(type: "TEXT", nullable: true),
+                    LastName = table.Column<string>(type: "TEXT", nullable: true),
+                    GPA = table.Column<double>(type: "REAL", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Students", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Courses",
                 columns: table => new
                 {
@@ -42,44 +56,50 @@ namespace GraphQLDemo.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Students",
+                name: "CourseDTOStudentDTO",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    FirstName = table.Column<string>(type: "TEXT", nullable: true),
-                    LastName = table.Column<string>(type: "TEXT", nullable: true),
-                    GPA = table.Column<double>(type: "REAL", nullable: false),
-                    CourseDTOId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    CoursesId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    StudentsId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Students", x => x.Id);
+                    table.PrimaryKey("PK_CourseDTOStudentDTO", x => new { x.CoursesId, x.StudentsId });
                     table.ForeignKey(
-                        name: "FK_Students_Courses_CourseDTOId",
-                        column: x => x.CourseDTOId,
+                        name: "FK_CourseDTOStudentDTO_Courses_CoursesId",
+                        column: x => x.CoursesId,
                         principalTable: "Courses",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CourseDTOStudentDTO_Students_StudentsId",
+                        column: x => x.StudentsId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseDTOStudentDTO_StudentsId",
+                table: "CourseDTOStudentDTO",
+                column: "StudentsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Courses_InstructorId",
                 table: "Courses",
                 column: "InstructorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Students_CourseDTOId",
-                table: "Students",
-                column: "CourseDTOId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Students");
+                name: "CourseDTOStudentDTO");
 
             migrationBuilder.DropTable(
                 name: "Courses");
+
+            migrationBuilder.DropTable(
+                name: "Students");
 
             migrationBuilder.DropTable(
                 name: "Instructors");
