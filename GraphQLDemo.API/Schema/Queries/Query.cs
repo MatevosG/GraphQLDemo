@@ -36,6 +36,7 @@ namespace GraphQLDemo.API.Schema.Queries
         [UseDbContext(typeof(SchoolDbContext))]
         [UseOffsetPaging(IncludeTotalCount = true, DefaultPageSize = 10)]
         [UseFiltering]
+        [UseSorting]
         public IQueryable<CourseType> GetPaginatedCourses([ScopedService] SchoolDbContext DbContext)
         {
 
