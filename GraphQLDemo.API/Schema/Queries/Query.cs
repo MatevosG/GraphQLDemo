@@ -1,59 +1,73 @@
-﻿using Bogus;
-using GraphQLDemo.API.Models;
-using System;
+﻿using GraphQLDemo.API.DTOs;
+using GraphQLDemo.API.Services;
+using GraphQLDemo.API.Services.Courses;
+using HotChocolate;
+using HotChocolate.Data;
+using HotChocolate.Types;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GraphQLDemo.API.Schema.Queries
 {
     public class Query
     {
-        private readonly Faker<InstruktorType> _instruktorFaker;
-        private readonly Faker<StudentType> _studentFaker;
-        private readonly Faker<CourseType> _coursFaker;
-
-        public Query()
+        private readonly  CoursesRepository _coursesRepository;
+        public Query(CoursesRepository coursesRepository)
         {
-            _instruktorFaker = new Faker<InstruktorType>()
-                               .RuleFor(c => c.Id, f => Guid.NewGuid())
-                               .RuleFor(c => c.FirstName, f => f.Name.FirstName())
-                               .RuleFor(c => c.LastName, f => f.Name.LastName())
-                               .RuleFor(c => c.Salary, f => f.Random.Double(0, 10000));
-
-
-            _studentFaker = new Faker<StudentType>()
-                            .RuleFor(c => c.Id, f => Guid.NewGuid())
-                            .RuleFor(c => c.FirstName, f => f.Name.FirstName())
-                            .RuleFor(c => c.LastName, f => f.Name.LastName())
-                            .RuleFor(c => c.GPA, f => f.Random.Double(1, 4));
-
-
-            _coursFaker = new Faker<CourseType>()
-                           .RuleFor(c => c.Id, f => Guid.NewGuid())
-                           .RuleFor(c => c.Name, f => f.Name.JobTitle())
-                           .RuleFor(c => c.Students, f => _studentFaker.Generate(3))
-                           .RuleFor(c => c.Instruktor, f => _instruktorFaker.Generate())
-                .RuleFor(c => c.Subject, f => f.PickRandom<Subject>());
-
-        }
-        public IEnumerable<CourseType> GetCourses()
-        {
-            return _coursFaker.Generate(3);
+            _coursesRepository = coursesRepository;
         }
 
-        public async Task<CourseType> GetCourseByIdAsync(Guid id)
+        //[UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
+        //public async Task<IEnumerable<CourseType>> GetCourses()
+        //{
+        //    IEnumerable<CourseDTO> coursedtoss = await _coursesRepository.GetAllCouses();
+
+        //    return coursedtoss.Select(c => new CourseType()
+        //    {
+        //        Id = c.Id,
+        //        Name = c.Name,
+        //        Subject = c.Subject,
+        //        InstructorId = c.InstructorId,
+        //    });
+        //}
+
+
+        [UseDbContext(typeof(SchoolDbContext))]
+        [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
+        // [UseFiltering]
+        public IQueryable<CourseType> GetPaginatedCourses([ScopedService] SchoolDbContext bookmarkDbContext)
         {
-            await Task.Delay(1000);
 
-            CourseType course = _coursFaker.Generate();
+            //IQueryable<CourseDTO> coursedtoss = _coursesRepository.GetAllQUeryCouses();
+            /// IEnumerable<CourseDTO> coursedtoss =  _coursesRepository.GetAllQUeryCouses();
 
-            course.Id = id;
-
-            return course;
+            return bookmarkDbContext.Courses.Select(c => new CourseType()
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Subject = c.Subject,
+                InstructorId = c.InstructorId,
+            });
         }
 
 
-        // [GraphQLDeprecated("This query is deprecated")]
-        // public string Instructions => null;
+
+        //public async Task<CourseType> GetCourseById(int id)
+        //{
+        //    CourseDTO coursedto = await _coursesRepository.GetCourseById(id);
+
+        //    return new CourseType()
+        //    {
+        //        Id = coursedto.Id,
+        //        Name = coursedto.Name,
+        //        Subject = coursedto.Subject,
+        //        InstructorId = coursedto.InstructorId,
+        //    };
+        //}
+
+
+        [GraphQLDeprecated("This query is deprecated")]
+        public string Instructions => "lllllllllllllllllllllllllll";
     }
 }

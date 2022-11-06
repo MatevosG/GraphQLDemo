@@ -15,7 +15,7 @@ namespace GraphQLDemo.API.Schema.Subscriptions
         public CourseResult CourseCreated([EventMessage] CourseResult course) => course;
 
         [SubscribeAndResolve]
-        public ValueTask<ISourceStream<CourseResult>> CourseUpdated(Guid coursId, [Service] ITopicEventReceiver topicEventReceiver)
+        public ValueTask<ISourceStream<CourseResult>> CourseUpdated(int coursId, [Service] ITopicEventReceiver topicEventReceiver)
         {
             string topicName = $"{coursId}_{nameof(Subscription.CourseCreated)}";
 

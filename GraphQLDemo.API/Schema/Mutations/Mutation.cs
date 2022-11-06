@@ -1,7 +1,7 @@
 ﻿using GraphQLDemo.API.DTOs;
 using GraphQLDemo.API.Schema.Queries;
 using GraphQLDemo.API.Schema.Subscriptions;
-using GraphQLDemo.API.Services;
+using GraphQLDemo.API.Services.Courses;
 using HotChocolate;
 using HotChocolate.Subscriptions;
 using System;
@@ -13,21 +13,18 @@ namespace GraphQLDemo.API.Schema.Mutations
 {
     public class Mutation
     {
-       // private readonly List<CourseResult> _courses = new List<CourseResult>();
-
-        private readonly CoursesRepository _coursesRepository ;
+        private readonly CoursesRepository _coursesRepository;
 
         public Mutation(List<CourseResult> courses, CoursesRepository coursesRepository)
         {
-            
             _coursesRepository = coursesRepository;
         }
-
-        public async Task<CourseResult> CreateCourse(CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender)
+        public CourseResult CreateCourse(CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender)
         {
 
             CourseDTO courseDTO = new CourseDTO
             {
+                //Id = courseInputType.Id,
                 Name = courseInputType.Name,
                 Subject = courseInputType.Subject,
                 InstructorId = courseInputType.InstruktorId
@@ -35,49 +32,57 @@ namespace GraphQLDemo.API.Schema.Mutations
 
             _coursesRepository.Create(courseDTO);
 
-            CourseResult course   = new CourseResult
+            CourseResult course = new CourseResult
             {
                 Id = courseDTO.Id,
                 Name = courseDTO.Name,
                 Subject = courseDTO.Subject,
                 InstruktorId = courseDTO.InstructorId
             };
-           // _coursesRepository.Create(course);
-            
-            await topicEventSender.SendAsync(nameof(Subscription.CourseCreated) , course);
+            // _coursesRepository.Create(course);
+
+            topicEventSender.SendAsync(nameof(Subscription.CourseCreated), course);
             return course;
         }
 
-        public async Task<CourseResult> UpdateCourse(Guid id,CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender)
+        public async Task<CourseResult> UpdateCourse(CourseInputType courseInputType, [Service] ITopicEventSender topicEventSender)
         {
-            var course = _courses.FirstOrDefault(x => x.Id == id);
-
-            if (course == null)
+            CourseDTO courseDTO = new CourseDTO
             {
-                throw new Exception("Coure not found");
-            }
+                Id = courseInputType.Id,
+                Name = courseInputType.Name,
+                Subject = courseInputType.Subject,
+                InstructorId = courseInputType.InstruktorId
+            };
+            courseDTO = await _coursesRepository.Update(courseDTO);
 
-            course.Name = courseInputType.Name; 
-            course.Subject = courseInputType.Subject;   
-            course.InstruktorId = courseInputType.InstruktorId;
+            CourseResult course = new CourseResult
+            {
+                Id = courseDTO.Id,
+                Name = courseDTO.Name,
+                Subject = courseDTO.Subject,
+                InstruktorId = courseDTO.InstructorId
+            };
 
             string updateCourseTopic = $"{course.Id}_{nameof(Subscription.CourseUpdated)}";
 
             await topicEventSender.SendAsync(updateCourseTopic, course);
-         
+
             return course;
         }
 
-
-        public bool DeleteCourse(Guid id)
+        public async Task<bool> DeleteCourse(int id)
         {
-            var course = _courses.FirstOrDefault(x=>x.Id == id);
-            if (course == null)
+            try
             {
-                throw new GraphQLException(new Error("Course not found.", "havest chka"));
+                await _coursesRepository.Delete(id);
+                return true;
             }
-            _courses.Remove(course);
-            return true;
+            catch (Exception)
+            {
+                return false;
+            }
+
         }
     }
 }

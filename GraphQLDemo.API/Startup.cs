@@ -1,13 +1,18 @@
+using GraphQLDemo.API.DataLoaders;
+using GraphQLDemo.API.DTOs;
 using GraphQLDemo.API.Schema.Mutations;
 using GraphQLDemo.API.Schema.Queries;
 using GraphQLDemo.API.Schema.Subscriptions;
 using GraphQLDemo.API.Services;
+using GraphQLDemo.API.Services.Courses;
+using GraphQLDemo.API.Services.Instructor;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 
 namespace GraphQLDemo.API
 {
@@ -20,23 +25,38 @@ namespace GraphQLDemo.API
         }
         public void ConfigureServices(IServiceCollection services)
         {
+            string connectionstring = _configuration.GetConnectionString("default");
 
-            services.AddGraphQLServer()
+            services.AddPooledDbContextFactory<SchoolDbContext>(o => o.UseSqlServer(connectionstring).LogTo(Console.WriteLine));
+            services.AddGraphQLServer().RegisterDbContext<SchoolDbContext>()
                                       .AddQueryType<Query>()
                                       .AddMutationType<Mutation>()
                                       .AddSubscriptionType<Subscription>()
                                       .AddType<CourseType>()
-                                      //.AddType<CourseResult>()
+                                      //.AddType<CourseDTO>()
                                       .AddType<InstruktorType>()
                                       .AddType<StudentType>();
+                                      //.AddFiltering();
 
             services.AddInMemorySubscriptions();
 
-            string connectionstring = _configuration.GetConnectionString("default");
+            //services.AddDbContext<SchoolDbContext>(options =>
+            //                                       options.UseSqlServer(_configuration.GetConnectionString("default")));
 
-            services.AddPooledDbContextFactory<SchoolDbContext>(o => o.UseSqlite(connectionstring));
+            //services.AddScoped<ICoursesRepository,CoursesRepository> ();
 
-            services.AddScoped<CoursesRepository>();
+
+            //string connectionstring = _configuration.GetConnectionString("default");
+
+            
+
+           
+            //services.AddPooledDbContextFactory<SchoolDbContext>(o => o.UseSqlServer(connectionstring).LogTo(Console.WriteLine));
+           // services.AddDbContext<SchoolDbContext>(o => o.UseSqlServer(connectionstring).LogTo(Console.WriteLine));
+
+            services.AddScoped<CoursesRepository>(); 
+            services.AddScoped<InstructorRepository>();
+            services.AddScoped<InstructorDataLoader>();
 
         }
 
