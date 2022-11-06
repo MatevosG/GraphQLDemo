@@ -18,31 +18,12 @@ namespace GraphQLDemo.API.Schema.Queries
             _coursesRepository = coursesRepository;
         }
 
-        //[UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
-        //public async Task<IEnumerable<CourseType>> GetCourses()
-        //{
-        //    IEnumerable<CourseDTO> coursedtoss = await _coursesRepository.GetAllCouses();
-
-        //    return coursedtoss.Select(c => new CourseType()
-        //    {
-        //        Id = c.Id,
-        //        Name = c.Name,
-        //        Subject = c.Subject,
-        //        InstructorId = c.InstructorId,
-        //    });
-        //}
-
-
-        [UseDbContext(typeof(SchoolDbContext))]
         [UsePaging(IncludeTotalCount = true, DefaultPageSize = 10)]
-        // [UseFiltering]
-        public IQueryable<CourseType> GetPaginatedCourses([ScopedService] SchoolDbContext bookmarkDbContext)
+        public async Task<IEnumerable<CourseType>> GetCourses()
         {
+            IEnumerable<CourseDTO> coursedtoss = await _coursesRepository.GetAllCouses();
 
-            //IQueryable<CourseDTO> coursedtoss = _coursesRepository.GetAllQUeryCouses();
-            /// IEnumerable<CourseDTO> coursedtoss =  _coursesRepository.GetAllQUeryCouses();
-
-            return bookmarkDbContext.Courses.Select(c => new CourseType()
+            return coursedtoss.Select(c => new CourseType()
             {
                 Id = c.Id,
                 Name = c.Name,
@@ -52,19 +33,52 @@ namespace GraphQLDemo.API.Schema.Queries
         }
 
 
+        [UseDbContext(typeof(SchoolDbContext))]
+        [UseOffsetPaging(IncludeTotalCount = true, DefaultPageSize = 10)]
+        [UseFiltering]
+        public IQueryable<CourseType> GetPaginatedCourses([ScopedService] SchoolDbContext DbContext)
+        {
 
-        //public async Task<CourseType> GetCourseById(int id)
-        //{
-        //    CourseDTO coursedto = await _coursesRepository.GetCourseById(id);
+           // IQueryable<CourseDTO> coursedtoss = _coursesRepository.GetAllQUeryCouses();
+            // IEnumerable<CourseDTO> coursedtoss =  _coursesRepository.GetAllQUeryCouses();
 
-        //    return new CourseType()
-        //    {
-        //        Id = coursedto.Id,
-        //        Name = coursedto.Name,
-        //        Subject = coursedto.Subject,
-        //        InstructorId = coursedto.InstructorId,
-        //    };
-        //}
+            return DbContext.Courses.Select(c => new CourseType()
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Subject = c.Subject,
+                InstructorId = c.InstructorId,
+            });
+        }
+
+        [UseOffsetPaging(IncludeTotalCount = true, DefaultPageSize = 10)]
+        public async Task<IEnumerable<CourseType>> GetOffsetCourses()
+        {
+            IEnumerable<CourseDTO> coursedtoss = await _coursesRepository.GetAllCouses();
+
+            //var coursedtos = _context.Courses.AsEnumerable();
+
+            return coursedtoss.Select(c => new CourseType()
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Subject = c.Subject,
+                InstructorId = c.InstructorId,
+            });
+        }
+
+        public async Task<CourseType> GetCourseById(int id)
+        {
+            CourseDTO coursedto = await _coursesRepository.GetCourseById(id);
+
+            return new CourseType()
+            {
+                Id = coursedto.Id,
+                Name = coursedto.Name,
+                Subject = coursedto.Subject,
+                InstructorId = coursedto.InstructorId,
+            };
+        }
 
 
         [GraphQLDeprecated("This query is deprecated")]

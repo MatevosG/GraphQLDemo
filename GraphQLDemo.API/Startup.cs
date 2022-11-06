@@ -35,8 +35,8 @@ namespace GraphQLDemo.API
                                       .AddType<CourseType>()
                                       //.AddType<CourseDTO>()
                                       .AddType<InstruktorType>()
-                                      .AddType<StudentType>();
-                                      //.AddFiltering();
+                                      .AddType<StudentType>()
+                                      .AddFiltering();
 
             services.AddInMemorySubscriptions();
 
